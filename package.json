@@ -1,0 +1,39 @@
+{
+  "name": "model-translation-gateway",
+  "version": "1.0.0",
+  "description": "Gateway to translate Anthropic/Claude API requests to any LLM provider",
+  "private": true,
+  "workspaces": [
+    "server",
+    "dashboard",
+    "cli",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:dashboard\"",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:dashboard": "npm run dev --workspace=dashboard",
+    "build": "npm run build --workspaces",
+    "build:server": "npm run build --workspace=server",
+    "build:dashboard": "npm run build --workspace=dashboard",
+    "start": "npm run start --workspace=server",
+    "start:prod": "npm run start:prod --workspace=server",
+    "cli": "npm run start --workspace=cli",
+    "db:migrate": "npm run db:migrate --workspace=server",
+    "db:seed": "npm run db:seed --workspace=server",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm run test --workspaces",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "npm@10.8.0"
+}

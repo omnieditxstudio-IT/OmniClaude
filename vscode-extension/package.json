@@ -1,0 +1,208 @@
+{
+  "name": "model-translation-gateway",
+  "displayName": "Model Translation Gateway",
+  "description": "Use any LLM with Claude Code, Cursor, Windsurf, and other Anthropic-compatible coding agents through the Model Translation Gateway",
+  "version": "1.0.0",
+  "publisher": "gateway-team",
+  "icon": "icon.png",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/model-translation-gateway"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/model-translation-gateway/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning",
+    "API Tools"
+  ],
+  "keywords": [
+    "llm",
+    "anthropic",
+    "claude-code",
+    "gateway",
+    "model-translation",
+    "openrouter",
+    "ollama",
+    "vertex-ai"
+  ],
+  "activationEvents": [
+    "onCommand:gateway.start",
+    "onCommand:gateway.stop",
+    "onCommand:gateway.configure",
+    "onCommand:gateway.test",
+    "onCommand:gateway.openDashboard",
+    "onCommand:gateway.showLogs",
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "gateway.start",
+        "title": "Start Gateway",
+        "icon": "$(play)"
+      },
+      {
+        "command": "gateway.stop",
+        "title": "Stop Gateway",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "gateway.restart",
+        "title": "Restart Gateway",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "gateway.configure",
+        "title": "Configure Gateway",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "gateway.openDashboard",
+        "title": "Open Dashboard",
+        "icon": "$(globe)"
+      },
+      {
+        "command": "gateway.test",
+        "title": "Test Configuration",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "gateway.showLogs",
+        "title": "Show Logs",
+        "icon": "$(output)"
+      },
+      {
+        "command": "gateway.showMetrics",
+        "title": "Show Metrics",
+        "icon": "$(graph)"
+      }
+    ],
+    "configuration": {
+      "title": "Model Translation Gateway",
+      "properties": {
+        "gateway.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:3000",
+          "description": "Gateway server URL"
+        },
+        "gateway.autoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically start gateway when VS Code starts"
+        },
+        "gateway.claudeCodeIntegration": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically configure Claude Code to use gateway"
+        },
+        "gateway.dashboardPort": {
+          "type": "number",
+          "default": 5173,
+          "description": "Dashboard port"
+        },
+        "gateway.showNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show gateway notifications in VS Code"
+        }
+      }
+    },
+    "views": {
+      "gateway": [
+        {
+          "id": "gateway.status",
+          "name": "Gateway Status",
+          "when": "gateway.isRunning"
+        },
+        {
+          "id": "gateway.endpoints",
+          "name": "Endpoints"
+        },
+        {
+          "id": "gateway.mappings",
+          "name": "Model Mappings"
+        },
+        {
+          "id": "gateway.logs",
+          "name": "Recent Requests"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "gateway",
+          "title": "Model Gateway",
+          "icon": "media/gateway-icon.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "gateway.start",
+          "when": "view == gateway.status && !gateway.isRunning",
+          "group": "navigation"
+        },
+        {
+          "command": "gateway.stop",
+          "when": "view == gateway.status && gateway.isRunning",
+          "group": "navigation"
+        },
+        {
+          "command": "gateway.openDashboard",
+          "when": "view == gateway.status",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "gateway.test",
+          "when": "editorLangId == typescript || editorLangId == javascript || editorLangId == python",
+          "group": "gateway"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "gateway.start",
+        "key": "ctrl+alt+g s",
+        "mac": "cmd+alt+g s",
+        "when": "!gateway.isRunning"
+      },
+      {
+        "command": "gateway.stop",
+        "key": "ctrl+alt+g x",
+        "mac": "cmd+alt+g x",
+        "when": "gateway.isRunning"
+      },
+      {
+        "command": "gateway.openDashboard",
+        "key": "ctrl+alt+g d",
+        "mac": "cmd+alt+g d"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "eslint": "^8.56.0",
+    "@vscode/test-electron": "^2.3.0"
+  }
+}

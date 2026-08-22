@@ -10,6 +10,7 @@ import { auth } from './config/auth';
 import { connectDatabase } from './config/database';
 import { authPlugin } from './config/auth';
 import { metricsPlugin } from './plugins/metrics';
+import { tracingPlugin } from './plugins/tracing';
 import { cacheService } from './services/cache.service';
 import { keyRoutes } from './routes/keys';
 import { endpointRoutes } from './routes/endpoints';
@@ -19,6 +20,11 @@ import { authRoutes } from './routes/auth';
 import { adminRoutes } from './routes/admin';
 import { healthRoutes } from './routes/health';
 import { webhookRoutes } from './routes/webhooks';
+import { promptRoutes } from './routes/prompts';
+import { budgetRoutes } from './routes/budgets';
+import { abTestRoutes } from './routes/ab-tests';
+import { replayRoutes } from './routes/replay';
+import { securityRoutes } from './routes/security';
 import env from './config';
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -38,6 +44,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   
   // Connect to Redis cache
   await cacheService.connect();
+  
+  // Initialize tracing
+  await fastify.register(tracingPlugin);
   
   // Register plugins
   await fastify.register(fastifyCors, {
@@ -123,6 +132,11 @@ export async function buildApp(): Promise<FastifyInstance> {
   await fastify.register(proxyRoutes);
   await fastify.register(adminRoutes);
   await fastify.register(webhookRoutes, { prefix: '/api' });
+  await fastify.register(promptRoutes, { prefix: '/api' });
+  await fastify.register(budgetRoutes, { prefix: '/api' });
+  await fastify.register(abTestRoutes, { prefix: '/api' });
+  await fastify.register(replayRoutes, { prefix: '/api' });
+  await fastify.register(securityRoutes, { prefix: '/api' });
   
   // Global error handler
   fastify.setErrorHandler(async (error, request, reply) => {

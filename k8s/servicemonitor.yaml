@@ -1,0 +1,39 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gateway-server-monitor
+  namespace: gateway
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: gateway-server
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - gateway
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gateway-python-router-monitor
+  namespace: gateway
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: gateway-python-router
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - gateway

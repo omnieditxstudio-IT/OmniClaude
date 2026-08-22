@@ -6,6 +6,9 @@
 [![React](https://img.shields.io/badge/React-18.3+-61dafb.svg)](https://react.dev/)
 [![Fastify](https://img.shields.io/badge/Fastify-4.27+-000000.svg)](https://www.fastify.io/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-7+-47A248.svg)](https://www.mongodb.com/)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://www.python.org/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5.svg)](https://kubernetes.io/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 
 A **Model Translation Gateway** that lets you use **any LLM** (DeepSeek, Llama, Qwen, Gemini, etc.) with **Claude Code**, **Codex**, **Cursor**, **Windsurf**, and other Anthropic-compatible coding agents.
 
@@ -46,6 +49,15 @@ Claude Code → [Gateway: http://localhost:3000] → [Any Provider]
 | **🐳 Docker Ready** | Production deployment with nginx, MongoDB |
 | **⚡ Streaming Support** | Full SSE streaming for all providers |
 | **🛠️ Tool Calling** | Translates tool calls across formats |
+| **🧠 Semantic Caching** | Redis-based exact + semantic caching with embeddings |
+| **🔔 Webhooks** | Event notifications for requests, errors, fallbacks |
+| **👥 Teams & Organizations** | Multi-tenant with RBAC, budgets, usage limits |
+| **🤖 Smart Routing** | Python router with adaptive ML-based selection, circuit breakers |
+| **📝 Prompt Templates** | Versioned templates with variables, optimization, rendering |
+| **🚀 Prompt Optimization** | Auto-compress, structure, disambiguate, add examples |
+| **☸️ Kubernetes Native** | Helm charts, HPA, ServiceMonitors, NetworkPolicies |
+| **🔄 CI/CD Pipeline** | GitHub Actions with tests, security scans, multi-arch builds |
+| **📦 TypeScript/Python SDKs** | Full-featured clients for easy integration |
 
 ---
 
@@ -172,30 +184,40 @@ Now when you use **Claude Code**, it thinks it's talking to Anthropic but actual
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-                      CLI Entry Point
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────────────────────────┐
+                              CLI Entry Point
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
                     Fastify API Server (Port 3000)
-       ┌─────────────┬─────────────┬─────────────┬──────────┐
-       ▼             ▼             ▼             ▼          ▼
-   ┌────────┐  ┌───────────┐  ┌──────────┐  ┌────────┐ ┌────────┐
-   │  Auth  │  │ Dashboard │  │  Proxy   │  │ Admin  │ │ Health │
-   │ Routes │  │  REST API │  │ Engine   │  │ Routes │ │ Routes │
-   └────────┘  └───────────┘  └──────────┘  └────────┘ └────────┘
-                        │             │
-                        ▼             ▼
-                   ┌─────────┐  ┌──────────────────┐
-                   │ MongoDB │  │ Translation      │
-                   │ (Users, │  │ Engine           │
-                   │ Keys,   │  │ ├─ Anthropic→    │
-                   │ Mappings)│  │ │  OpenAI       │
-                   └─────────┘  │ ├─ Anthropic→    │
+       ┌─────────────┬─────────────┬─────────────┬──────────┬──────────┐
+       ▼             ▼             ▼             ▼          ▼          ▼
+   ┌────────┐  ┌───────────┐  ┌──────────┐  ┌────────┐ ┌────────┐ ┌────────┐
+   │  Auth  │  │ Dashboard │  │  Proxy   │  │ Admin  │ │ Health │ │Prompt  │
+   │ Routes │  │  REST API │  │ Engine   │  │ Routes │ │ Routes │ │Routes  │
+   └────────┘  └───────────┘  └──────────┘  └────────┘ └────────┘ └────────┘
+                        │             │                    │
+                        ▼             ▼                    ▼
+                   ┌─────────┐  ┌──────────────────┐ ┌─────────────┐
+                   │ MongoDB │  │ Translation      │ │   Redis     │
+                   │ (Users, │  │ Engine           │ │  (Cache,    │
+                   │ Keys,   │  │ ├─ Anthropic→    │ │  Sessions,  │
+                   │ Mappings)│  │ │  OpenAI       │ │  Pub/Sub)   │
+                   └─────────┘  │ ├─ Anthropic→    │ └─────────────┘
                                 │ │  Ollama       │
                                 │ ├─ Anthropic→    │
                                 │ │  Vertex       │
                                 │ └─ Python Router │
+                                └──────────────────┘
+                                         │
+                                         ▼
+                                ┌──────────────────┐
+                                │  Python Router   │
+                                │  (Port 8000)     │
+                                │ ├─ Adaptive ML   │
+                                │ ├─ Circuit Break │
+                                │ ├─ Load Balance  │
+                                │ └─ Health Checks │
                                 └──────────────────┘
 ```
 
@@ -209,6 +231,17 @@ Now when you use **Claude Code**, it thinks it's talking to Anthropic but actual
 | Anthropic → Anthropic | Passthrough |
 
 Supports: **Streaming**, **Tool Calling**, **Vision**, **System Prompts**, **Temperature**, **Max Tokens**
+
+### Python Router (Advanced Routing)
+
+| Feature | Description |
+|---------|-------------|
+| **Adaptive ML Routing** | Learns from request outcomes to optimize model selection |
+| **Circuit Breakers** | Automatic failover with half-open recovery |
+| **Multiple Strategies** | Round-robin, Least Latency, Least Errors, Cost Optimized, Priority, Weighted, Adaptive |
+| **Health Checks** | Continuous endpoint monitoring with Redis persistence |
+| **Metrics & Analytics** | Prometheus metrics, latency percentiles, cost estimation |
+| **Fallback Chains** | Configurable multi-level fallback with priority |
 
 ---
 

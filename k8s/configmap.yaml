@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-config
+  namespace: gateway
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  HOST: "0.0.0.0"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  DASHBOARD_URL: "https://gateway.example.com"
+  PYTHON_ROUTER_URL: "http://gateway-python-router:8000"
+  PYTHON_ROUTER_ENABLED: "true"
+  OAUTH_REDIRECT_URI: "https://gateway.example.com/api/auth/callback"

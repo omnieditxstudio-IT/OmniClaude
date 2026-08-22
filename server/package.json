@@ -11,7 +11,12 @@
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
     "db:migrate": "tsx src/scripts/migrate.ts",
-    "db:seed": "tsx src/scripts/seed.ts"
+    "db:seed": "tsx src/scripts/seed.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
@@ -32,11 +37,21 @@
     "dotenv": "^16.4.5",
     "better-auth": "^0.8.0",
     "arctic": "^2.0.0",
+    "ioredis": "^5.4.1",
+    "prom-client": "^15.1.0",
+    "js-yaml": "^4.1.0",
     "@gateway/shared": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
+    "@types/js-yaml": "^4.0.9",
     "tsx": "^4.7.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "supertest": "^7.0.0",
+    "@types/supertest": "^6.0.2",
+    "mongodb-memory-server": "^9.2.0",
+    "msw": "^2.3.0"
   }
 }

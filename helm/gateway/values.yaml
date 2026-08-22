@@ -1,0 +1,222 @@
+# Default values for Model Translation Gateway
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 3
+
+image:
+  registry: ghcr.io
+  repository: your-org/gateway
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3000"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: gateway.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: dashboard
+          port: 80
+    - host: api.gateway.example.com
+      paths:
+        - path: /api/
+          pathType: Prefix
+          service: server
+          port: 3000
+        - path: /v1/
+          pathType: Prefix
+          service: server
+          port: 3000
+        - path: /health
+          pathType: Prefix
+          service: server
+          port: 3000
+        - path: /docs
+          pathType: Prefix
+          service: server
+          port: 3000
+        - path: /metrics
+          pathType: Prefix
+          service: server
+          port: 3000
+  tls:
+    - secretName: gateway-tls
+      hosts:
+        - gateway.example.com
+        - api.gateway.example.com
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: gateway_http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: "100"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - model-translation-gateway
+          topologyKey: kubernetes.io/hostname
+
+# Application configuration
+config:
+  NODE_ENV: production
+  PORT: "3000"
+  HOST: "0.0.0.0"
+  LOG_LEVEL: info
+  LOG_FORMAT: json
+  DASHBOARD_URL: "https://gateway.example.com"
+  PYTHON_ROUTER_URL: "http://{{ .Release.Name }}-python-router:8000"
+  PYTHON_ROUTER_ENABLED: "true"
+  OAUTH_REDIRECT_URI: "https://gateway.example.com/api/auth/callback"
+
+# Secrets (use external secret operator or sealed secrets in production)
+secrets:
+  ENCRYPTION_KEY: ""
+  JWT_SECRET: ""
+  JWT_REFRESH_SECRET: ""
+  GOOGLE_CLIENT_ID: ""
+  GOOGLE_CLIENT_SECRET: ""
+  GITHUB_CLIENT_ID: ""
+  GITHUB_CLIENT_SECRET: ""
+  MONGODB_URI: ""
+  REDIS_URL: ""
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+  uri: ""
+  # Or use external MongoDB
+  # external:
+  #   host: mongodb.example.com
+  #   port: 27017
+  #   database: gateway
+  #   username: gateway
+  #   password: ""
+
+# Redis configuration
+redis:
+  enabled: true
+  url: ""
+  # Or use external Redis
+  # external:
+  #   host: redis.example.com
+  #   port: 6379
+
+# Python Router configuration
+pythonRouter:
+  enabled: true
+  replicaCount: 2
+  image:
+    registry: ghcr.io
+    repository: your-org/gateway/python-router
+    tag: latest
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+
+# Dashboard configuration
+dashboard:
+  enabled: true
+  replicaCount: 2
+  image:
+    registry: ghcr.io
+    repository: your-org/gateway/dashboard
+    tag: latest
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+  prometheusRule:
+    enabled: true
+
+# Network policies
+networkPolicy:
+  enabled: true

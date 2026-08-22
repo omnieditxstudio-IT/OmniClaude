@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-server
+  namespace: gateway
+  labels:
+    app: gateway-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: gateway-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-dashboard
+  namespace: gateway
+  labels:
+    app: gateway-dashboard
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: gateway-dashboard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-python-router
+  namespace: gateway
+  labels:
+    app: gateway-python-router
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  selector:
+    app: gateway-python-router

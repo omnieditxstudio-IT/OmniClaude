@@ -1,0 +1,34 @@
+{
+  "name": "@gateway/sdk",
+  "version": "1.0.0",
+  "description": "TypeScript SDK for Model Translation Gateway",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "gateway",
+    "llm",
+    "anthropic",
+    "translation",
+    "sdk"
+  ],
+  "author": "Gateway Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}

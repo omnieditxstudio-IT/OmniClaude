@@ -1,0 +1,61 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: gateway
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secrets.yaml
+  - rbac.yaml
+  - server-deployment.yaml
+  - dashboard-deployment.yaml
+  - python-router-deployment.yaml
+  - services.yaml
+  - ingress.yaml
+  - hpa.yaml
+  - servicemonitor.yaml
+
+commonLabels:
+  app.kubernetes.io/name: model-translation-gateway
+  app.kubernetes.io/part-of: gateway
+  app.kubernetes.io/managed-by: kustomize
+
+images:
+  - name: ghcr.io/your-org/gateway/server
+    newTag: latest
+  - name: ghcr.io/your-org/gateway/dashboard
+    newTag: latest
+  - name: ghcr.io/your-org/gateway/python-router
+    newTag: latest
+
+configMapGenerator:
+  - name: gateway-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+
+secretGenerator:
+  - name: gateway-secrets
+    behavior: merge
+    envs:
+      - .env.secrets  # Create this file with your secrets
+
+patches:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: gateway-server
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                env:
+                  - name: JAVA_OPTS
+                    value: "-Xms256m -Xmx1g"

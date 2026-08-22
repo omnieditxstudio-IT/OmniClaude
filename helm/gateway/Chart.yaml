@@ -1,0 +1,17 @@
+apiVersion: v2
+name: model-translation-gateway
+description: A Helm chart for deploying Model Translation Gateway
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - gateway
+  - llm
+  - ai
+  - anthropic
+  - translation
+maintainers:
+  - name: Gateway Team
+    email: team@gateway.example.com
+sources:
+  - https://github.com/your-org/model-translation-gateway

@@ -11,6 +11,7 @@ import {
   VertexRequest,
   VertexContent,
 } from '@gateway/shared';
+import { PersonaEnforcer, getPersonaConfig } from './persona.service';
 
 export interface TranslationContext {
   claudeModelId: string;
@@ -32,22 +33,27 @@ export interface ForwardResult {
 }
 
 export class TranslationService {
+  private personaEnforcer = new PersonaEnforcer();
+  
   /**
    * Main entry point: translate Anthropic request and forward to provider
    */
   async translateAndForward(context: TranslationContext, request: AnthropicMessagesRequest): Promise<ForwardResult> {
     const { provider } = context.endpoint;
     
+    // Enforce persona on incoming request
+    const enforcedRequest = this.personaEnforcer.enforceRequest(request, context.endpoint.provider, context.providerModelId);
+    
     switch (provider) {
       case 'openrouter':
       case 'custom':
-        return this.forwardToOpenAICompatible(context, request);
+        return this.forwardToOpenAICompatible(context, enforcedRequest);
       case 'ollama':
-        return this.forwardToOllama(context, request);
+        return this.forwardToOllama(context, enforcedRequest);
       case 'vertex':
-        return this.forwardToVertex(context, request);
+        return this.forwardToVertex(context, enforcedRequest);
       case 'anthropic':
-        return this.forwardToAnthropic(context, request);
+        return this.forwardToAnthropic(context, enforcedRequest);
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }
@@ -59,19 +65,22 @@ export class TranslationService {
   async *translateAndForwardStream(context: TranslationContext, request: AnthropicMessagesRequest): AsyncGenerator<AnthropicStreamEvent> {
     const { provider } = context.endpoint;
     
+    // Enforce persona on incoming request
+    const enforcedRequest = this.personaEnforcer.enforceRequest(request, context.endpoint.provider, context.providerModelId);
+    
     switch (provider) {
       case 'openrouter':
       case 'custom':
-        yield* this.forwardToOpenAICompatibleStream(context, request);
+        yield* this.forwardToOpenAICompatibleStream(context, enforcedRequest);
         break;
       case 'ollama':
-        yield* this.forwardToOllamaStream(context, request);
+        yield* this.forwardToOllamaStream(context, enforcedRequest);
         break;
       case 'vertex':
-        yield* this.forwardToVertexStream(context, request);
+        yield* this.forwardToVertexStream(context, enforcedRequest);
         break;
       case 'anthropic':
-        yield* this.forwardToAnthropicStream(context, request);
+        yield* this.forwardToAnthropicStream(context, enforcedRequest);
         break;
       default:
         throw new Error(`Unsupported provider: ${provider}`);
@@ -84,7 +93,12 @@ export class TranslationService {
   private async forwardToOpenAICompatible(context: TranslationContext, request: AnthropicMessagesRequest): Promise<ForwardResult> {
     const openaiRequest = this.anthropicToOpenAI(request, context.providerModelId);
     const response = await this.postOpenAI(context, openaiRequest);
-    return this.openAIToAnthropic(response, context.claudeModelId);
+    let result = this.openAIToAnthropic(response, context.claudeModelId);
+    
+    // Enforce persona on response
+    result.response = this.personaEnforcer.enforceResponse(result.response as any, context.endpoint.provider, context.providerModelId);
+    
+    return result;
   }
   
   private async *forwardToOpenAICompatibleStream(context: TranslationContext, request: AnthropicMessagesRequest): AsyncGenerator<AnthropicStreamEvent> {
@@ -127,11 +141,14 @@ export class TranslationService {
       }
       
       if (choice.delta?.content) {
+        // Enforce persona on streaming content
+        const enforcedContent = this.personaEnforcer.enforceStreamChunk(choice.delta.content, context.endpoint.provider, context.providerModelId);
+        
         // content_block_delta
         yield {
           type: 'content_block_delta',
           index: 0,
-          delta: { type: 'text_delta', text: choice.delta.content },
+          delta: { type: 'text_delta', text: enforcedContent },
         };
       }
       
@@ -180,7 +197,12 @@ export class TranslationService {
   private async forwardToOllama(context: TranslationContext, request: AnthropicMessagesRequest): Promise<ForwardResult> {
     const ollamaRequest = this.anthropicToOllama(request, context.providerModelId, context.endpoint.config);
     const response = await this.postOllama(context, ollamaRequest);
-    return this.ollamaToAnthropic(response, context.claudeModelId);
+    let result = this.ollamaToAnthropic(response, context.claudeModelId);
+    
+    // Enforce persona on response
+    result.response = this.personaEnforcer.enforceResponse(result.response as any, context.endpoint.provider, context.providerModelId);
+    
+    return result;
   }
   
   private async *forwardToOllamaStream(context: TranslationContext, request: AnthropicMessagesRequest): AsyncGenerator<AnthropicStreamEvent> {
@@ -211,10 +233,13 @@ export class TranslationService {
       }
       
       if (chunk.message?.content) {
+        // Enforce persona on streaming content
+        const enforcedContent = this.personaEnforcer.enforceStreamChunk(chunk.message.content, context.endpoint.provider, context.providerModelId);
+        
         yield {
           type: 'content_block_delta',
           index: 0,
-          delta: { type: 'text_delta', text: chunk.message.content },
+          delta: { type: 'text_delta', text: enforcedContent },
         };
       }
       
@@ -236,7 +261,12 @@ export class TranslationService {
   private async forwardToVertex(context: TranslationContext, request: AnthropicMessagesRequest): Promise<ForwardResult> {
     const vertexRequest = this.anthropicToVertex(request, context.providerModelId);
     const response = await this.postVertex(context, vertexRequest);
-    return this.vertexToAnthropic(response, context.claudeModelId);
+    let result = this.vertexToAnthropic(response, context.claudeModelId);
+    
+    // Enforce persona on response
+    result.response = this.personaEnforcer.enforceResponse(result.response as any, context.endpoint.provider, context.providerModelId);
+    
+    return result;
   }
   
   private async *forwardToVertexStream(context: TranslationContext, request: AnthropicMessagesRequest): AsyncGenerator<AnthropicStreamEvent> {
@@ -269,10 +299,13 @@ export class TranslationService {
       if (chunk.candidates?.[0]?.content?.parts) {
         for (const part of chunk.candidates[0].content.parts) {
           if (part.text) {
+            // Enforce persona on streaming content
+            const enforcedText = this.personaEnforcer.enforceStreamChunk(part.text, context.endpoint.provider, context.providerModelId);
+            
             yield {
               type: 'content_block_delta',
               index: 0,
-              delta: { type: 'text_delta', text: part.text },
+              delta: { type: 'text_delta', text: enforcedText },
             };
           }
         }
@@ -298,7 +331,12 @@ export class TranslationService {
   // ============================================
   private async forwardToAnthropic(context: TranslationContext, request: AnthropicMessagesRequest): Promise<ForwardResult> {
     const response = await this.postAnthropic(context, request);
-    return response;
+    let result = response;
+    
+    // Even for passthrough, enforce persona
+    result = this.personaEnforcer.enforceResponse(result as any, context.endpoint.provider, context.providerModelId);
+    
+    return result;
   }
   
   private async *forwardToAnthropicStream(context: TranslationContext, request: AnthropicMessagesRequest): AsyncGenerator<AnthropicStreamEvent> {
@@ -306,7 +344,18 @@ export class TranslationService {
     const response = await this.postAnthropicStream(context, streamRequest);
     
     for await (const chunk of response) {
-      yield chunk;
+      // Enforce persona on each streaming chunk
+      if (chunk.type === 'content_block_delta' && chunk.delta?.text) {
+        yield {
+          ...chunk,
+          delta: {
+            ...chunk.delta,
+            text: this.personaEnforcer.enforceStreamChunk(chunk.delta.text, context.endpoint.provider, context.providerModelId),
+          },
+        };
+      } else {
+        yield chunk;
+      }
     }
   }
   

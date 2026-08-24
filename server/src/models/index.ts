@@ -1309,3 +1309,37 @@ PersonaSchema.index({ teamId: 1, isActive: 1 });
 PersonaSchema.index({ category: 1 });
 
 export const Persona = mongoose.model<IPersona>('Persona', PersonaSchema);
+
+// Persona Audit Log model
+export interface IPersonaAuditLog extends Document {
+  _id: string;
+  personaId: string;
+  userId: string;
+  action: 'created' | 'updated' | 'deleted' | 'activated' | 'duplicated' | 'tested';
+  details: Record<string, any>;
+  previousState?: Record<string, any>;
+  newState?: Record<string, any>;
+  ipAddress?: string;
+  userAgent?: string;
+  createdAt: Date;
+}
+
+const PersonaAuditLogSchema = new Schema<IPersonaAuditLog>({
+  personaId: { type: Schema.Types.ObjectId, ref: 'Persona', required: true, index: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  action: { type: String, enum: ['created', 'updated', 'deleted', 'activated', 'duplicated', 'tested'], required: true },
+  details: { type: Schema.Types.Mixed, default: {} },
+  previousState: { type: Schema.Types.Mixed },
+  newState: { type: Schema.Types.Mixed },
+  ipAddress: { type: String },
+  userAgent: { type: String },
+}, {
+  timestamps: { createdAt: true, updatedAt: false },
+  collection: 'persona_audit_logs',
+});
+
+PersonaAuditLogSchema.index({ personaId: 1, createdAt: -1 });
+PersonaAuditLogSchema.index({ userId: 1, createdAt: -1 });
+PersonaAuditLogSchema.index({ action: 1, createdAt: -1 });
+
+export const PersonaAuditLog = mongoose.model<IPersonaAuditLog>('PersonaAuditLog', PersonaAuditLogSchema);

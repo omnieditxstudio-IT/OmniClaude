@@ -1,5 +1,6 @@
 import { AnthropicMessagesRequest, AnthropicContentBlock } from '@gateway/shared';
 import { PersonaConfig, ReasoningEnforcement } from './persona.types';
+import { multilingualPersonaService } from './multilingual-persona.service';
 
 /**
  * Persona Enforcement System
@@ -265,7 +266,13 @@ export class PersonaEnforcer {
     const persona = getPersonaConfig(provider, modelId);
     
     // Build enhanced system prompt
-    const enforcedSystemPrompt = this.buildEnforcedSystemPrompt(persona, request.system);
+    let enforcedSystemPrompt = this.buildEnforcedSystemPrompt(persona, request.system);
+    
+    // Add multilingual prompt if enabled
+    const multilingualPrompt = multilingualPersonaService.buildLanguagePrompt(persona);
+    if (multilingualPrompt) {
+      enforcedSystemPrompt += multilingualPrompt;
+    }
     
     // Apply model overrides from persona
     const enforcedRequest = {
@@ -277,7 +284,8 @@ export class PersonaEnforcer {
         : request.temperature,
     };
     
-    return enforcedRequest;
+    // Apply multilingual enforcement
+    return multilingualPersonaService.enforceMultilingual(enforcedRequest, provider, modelId);
   }
   
   /**
@@ -312,11 +320,7 @@ export class PersonaEnforcer {
     
     return systemPrompt;
   }
-      }
-    
-    return systemPrompt;
-  }
-  
+
   /**
    * Enforce persona on response - filter and transform
    */

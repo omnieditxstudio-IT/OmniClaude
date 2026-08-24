@@ -692,6 +692,312 @@ personaCmd
     }
   });
 
+personaCmd
+  .command('audit')
+  .description('Show audit log for a persona')
+  .argument('<id>', 'Persona ID')
+  .option('-l, --limit <n>', 'Max entries', '50')
+  .action(async (id, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.get(`${baseURL}/api/personas/${id}/audit-log?limit=${options.limit}`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('audit-user')
+  .description('Show audit log for current user')
+  .option('-l, --limit <n>', 'Max entries', '50')
+  .action(async (options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.get(`${baseURL}/api/personas/audit-log/user?limit=${options.limit}`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('test')
+  .description('Run tests for a persona')
+  .argument('<id>', 'Persona ID')
+  .option('--adversarial', 'Include adversarial tests')
+  .option('-s, --severity <level>', 'Minimum severity (low|medium|high|critical)', 'low')
+  .action(async (id, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.post(`${baseURL}/api/personas/${id}/test`, {
+        options: {
+          includeAdversarial: options.adversarial,
+          severityThreshold: options.severity,
+        },
+      }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(response.data.report);
+      console.log(JSON.stringify(response.data.results, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('test-all')
+  .description('Run tests for all active personas')
+  .option('--adversarial', 'Include adversarial tests')
+  .option('-s, --severity <level>', 'Minimum severity (low|medium|high|critical)', 'low')
+  .action(async (options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.post(`${baseURL}/api/personas/test/all`, {
+        options: {
+          includeAdversarial: options.adversarial,
+          severityThreshold: options.severity,
+        },
+      }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      for (const result of response.data) {
+        console.log(`\n${'='.repeat(40)}`);
+        console.log(`Persona: ${result.personaName}`);
+        console.log(result.report);
+      }
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('templates')
+  .description('List available persona templates')
+  .action(async (options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.get(`${baseURL}/api/personas/templates`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('template')
+  .description('Apply a persona template')
+  .argument('<templateId>', 'Template ID')
+  .argument('<name>', 'Persona name')
+  .option('-d, --description <desc>', 'Persona description')
+  .option('-v, --var <key=value>', 'Template variable (can be used multiple times)', [])
+  .action(async (templateId, name, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const variables: Record<string, any> = {};
+      for (const v of options.var) {
+        const [key, value] = v.split('=');
+        variables[key] = value;
+      }
+
+      const response = await axios.post(`${baseURL}/api/personas/templates/${templateId}/apply`, {
+        name,
+        description: options.description,
+        variables,
+      }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('languages')
+  .description('List supported languages for multilingual personas')
+  .action(async (options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      // Use built-in multilingual service directly since there's no dedicated endpoint
+      const { multilingualPersonaService } = await import('../services/multilingual-persona.service');
+      const languages = multilingualPersonaService.getSupportedLanguages();
+      console.log('Supported languages:');
+      languages.forEach(lang => {
+        const name = multilingualPersonaService.getLanguageName(lang);
+        console.log(`  ${lang.padEnd(4)} ${name}`);
+      });
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('templates')
+  .description('List available persona templates')
+  .action(async (options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.get(`${baseURL}/api/personas/templates`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('template')
+  .description('Apply a persona template')
+  .argument('<templateId>', 'Template ID')
+  .argument('<name>', 'Persona name')
+  .option('-d, --description <desc>', 'Persona description')
+  .option('-v, --var <key=value>', 'Template variable (can be used multiple times)', [])
+  .action(async (templateId, name, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const variables: Record<string, any> = {};
+      for (const v of options.var) {
+        const [key, value] = v.split('=');
+        variables[key] = value;
+      }
+
+      const response = await axios.post(`${baseURL}/api/personas/templates/${templateId}/apply`, {
+        name,
+        description: options.description,
+        variables,
+      }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('switch')
+  .description('Switch active persona for a conversation')
+  .argument('<personaId>', 'Target persona ID')
+  .option('-c, --conversation <id>', 'Conversation ID')
+  .option('-t, --transition <type>', 'Transition type (immediate|gradual|next-turn)', 'immediate')
+  .option('-b, --blend <n>', 'Number of blend messages for gradual transition', '3')
+  .action(async (personaId, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.post(`${baseURL}/api/personas/switch`, {
+        toPersonaId: personaId,
+        context: {
+          conversationId: options.conversation,
+        },
+        transition: options.transition,
+        blendMessages: parseInt(options.blend),
+      }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('active')
+  .description('Show active persona for conversation')
+  .option('-c, --conversation <id>', 'Conversation ID')
+  .action(async (options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.get(`${baseURL}/api/personas/switch/active?conversationId=${options.conversation || ''}`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('versions')
+  .description('List versions of a persona')
+  .argument('<id>', 'Persona ID')
+  .action(async (id, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.get(`${baseURL}/api/personas/${id}/versions`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('version')
+  .description('Create a new version of a persona')
+  .argument('<id>', 'Persona ID')
+  .option('-m, --major', 'Create major version')
+  .option('-c, --changelog <message>', 'Changelog message')
+  .action(async (id, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.post(`${baseURL}/api/personas/${id}/versions`, {
+        changelog: options.changelog,
+        isMajor: options.major,
+      }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('compare')
+  .description('Compare two versions of a persona')
+  .argument('<id>', 'Persona ID')
+  .argument('<from>', 'From version')
+  .argument('<to>', 'To version')
+  .action(async (id, from, to, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.get(`${baseURL}/api/personas/${id}/versions/compare?from=${from}&to=${to}`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('rollback')
+  .description('Rollback persona to a specific version')
+  .argument('<id>', 'Persona ID')
+  .argument('<version>', 'Version to rollback to')
+  .action(async (id, version, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.post(`${baseURL}/api/personas/${id}/versions/rollback`, {
+        version,
+      }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
 // ==================== Deployment Commands ====================
 const deployCmd = program
   .command('deploy')

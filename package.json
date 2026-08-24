@@ -26,7 +26,9 @@
     "test": "npm run test --workspaces",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "persona": "node persona-cli.js",
+    "personas": "node persona-cli.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

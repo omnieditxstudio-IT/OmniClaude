@@ -5,6 +5,7 @@ import ora from 'ora';
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { existsSync, readFileSync, rmSync } from 'fs';
 import { open } from 'open';
 import axios from 'axios';
 import dotenv from 'dotenv';
@@ -137,14 +138,40 @@ serverCmd
       
       // Find and kill process
       try {
-        const pids = execSync(`lsof -ti:${options.port}`).toString().trim().split('\n').filter(Boolean);
+        const isWindows = process.platform === 'win32';
+        let pids: string[] = [];
+        
+        if (isWindows) {
+          const netstat = execSync('netstat -ano').toString();
+          const regex = new RegExp(`TCP\\s+\\S+:${options.port}\\s+\\S+:\\d+\\s+LISTENING\\s+(\\d+)`, 'i');
+          const matches = netstat.match(new RegExp(regex.source, 'g'));
+          if (matches) {
+            pids = matches.map(m => m.match(regex)![1]);
+          }
+        } else {
+          const lsof = execSync(`lsof -ti:${options.port}`).toString().trim().split('\n').filter(Boolean);
+          pids = lsof;
+        }
+        
         for (const pid of pids) {
           process.kill(parseInt(pid), 'SIGTERM');
         }
         await new Promise(r => setTimeout(r, 1000));
         
         // Force kill if still running
-        const remaining = execSync(`lsof -ti:${options.port}`).toString().trim().split('\n').filter(Boolean);
+        let remaining: string[] = [];
+        if (isWindows) {
+          const netstat = execSync('netstat -ano').toString();
+          const regex = new RegExp(`TCP\\s+\\S+:${options.port}\\s+\\S+:\\d+\\s+LISTENING\\s+(\\d+)`, 'i');
+          const matches = netstat.match(new RegExp(regex.source, 'g'));
+          if (matches) {
+            remaining = matches.map(m => m.match(regex)![1]);
+          }
+        } else {
+          const lsof = execSync(`lsof -ti:${options.port}`).toString().trim().split('\n').filter(Boolean);
+          remaining = lsof;
+        }
+        
         for (const pid of remaining) {
           process.kill(parseInt(pid), 'SIGKILL');
         }
@@ -526,6 +553,145 @@ configCmd
     }
   });
 
+// ==================== Persona Commands ====================
+const personaCmd = program
+  .command('persona')
+  .description('Manage personas')
+  .alias('personas');
+
+personaCmd
+  .command('list')
+  .description('List all personas')
+  .option('-v, --verbose', 'Show detailed info')
+  .option('--active', 'Show only active persona')
+  .action(async (options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.get(`${baseURL}/api/personas`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('create')
+  .description('Create a new persona')
+  .argument('<name>', 'Persona name')
+  .option('-d, --description <desc>', 'Persona description')
+  .option('-c, --category <cat>', 'Category', 'custom')
+  .option('--file <path>', 'JSON file with full persona config')
+  .action(async (name, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      let config: any = { identity: { name, creator: 'Anthropic' }, systemPrompt: `You are ${name}.`, responseFilters: { removeModelNames: [], replaceWith: {}, blockPatterns: [] }, behavior: { enforceFirstPerson: true, enforceKnowledgeCutoff: 'April 2024', enforceCapabilities: [] } };
+      
+      if (options.file) {
+        config = JSON.parse(readFileSync(options.file, 'utf-8'));
+      }
+      
+      const response = await axios.post(`${baseURL}/api/personas`, {
+        name: options.file ? config.name : name,
+        description: options.description || config.description,
+        category: options.category || config.category || 'custom',
+        config,
+      }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('get')
+  .description('Get persona details')
+  .argument('<id>', 'Persona ID')
+  .action(async (id, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.get(`${baseURL}/api/personas/${id}`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('update')
+  .description('Update a persona')
+  .argument('<id>', 'Persona ID')
+  .option('--file <path>', 'JSON file with persona updates')
+  .action(async (id, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      let data: any = {};
+      if (options.file) {
+        data = JSON.parse(readFileSync(options.file, 'utf-8'));
+      }
+      const response = await axios.put(`${baseURL}/api/personas/${id}`, data, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('delete')
+  .description('Delete a persona')
+  .argument('<id>', 'Persona ID')
+  .action(async (id, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.delete(`${baseURL}/api/personas/${id}`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('activate')
+  .description('Activate a persona')
+  .argument('<id>', 'Persona ID')
+  .action(async (id, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.post(`${baseURL}/api/personas/${id}/activate`, {}, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('duplicate')
+  .description('Duplicate a persona')
+  .argument('<id>', 'Persona ID')
+  .option('-n, --name <name>', 'New persona name')
+  .action(async (id, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.post(`${baseURL}/api/personas/${id}/duplicate`, { name: options.name }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
 // ==================== Deployment Commands ====================
 const deployCmd = program
   .command('deploy')
@@ -660,7 +826,10 @@ program
     const dirs = ['dist', 'build', 'node_modules/.cache', 'out'];
     for (const dir of dirs) {
       try {
-        execSync(`rm -rf ${dir}`, { cwd: ROOT_DIR });
+        const target = join(ROOT_DIR, dir);
+        if (existsSync(target)) {
+          rmSync(target, { recursive: true, force: true });
+        }
       } catch {}
     }
     console.log(chalk.green('Cleaned build artifacts'));

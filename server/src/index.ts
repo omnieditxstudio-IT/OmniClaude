@@ -25,6 +25,7 @@ import { budgetRoutes } from './routes/budgets';
 import { abTestRoutes } from './routes/ab-tests';
 import { replayRoutes } from './routes/replay';
 import { securityRoutes } from './routes/security';
+import { personaRoutes } from './routes/personas';
 import env from './config';
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -137,6 +138,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await fastify.register(abTestRoutes, { prefix: '/api' });
   await fastify.register(replayRoutes, { prefix: '/api' });
   await fastify.register(securityRoutes, { prefix: '/api' });
+  await fastify.register(personaRoutes, { prefix: '/api' });
   
   // Global error handler
   fastify.setErrorHandler(async (error, request, reply) => {

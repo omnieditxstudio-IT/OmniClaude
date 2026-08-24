@@ -52,7 +52,6 @@
     "@opentelemetry/instrumentation-express": "^0.40.0",
     "@opentelemetry/instrumentation-mongodb": "^0.44.0",
     "@opentelemetry/instrumentation-redis": "^0.40.0",
-    "@opentelemetry/instrumentation-axios": "^0.38.0",
     "@gateway/shared": "^1.0.0"
   },
   "devDependencies": {

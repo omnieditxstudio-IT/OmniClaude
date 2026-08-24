@@ -1212,3 +1212,100 @@ DeadLetterQueueSchema.index({ createdAt: -1 });
 DeadLetterQueueSchema.index({ status: 1, createdAt: -1 });
 
 export const DeadLetterQueue = mongoose.model<IDeadLetterQueue>('DeadLetterQueue', DeadLetterQueueSchema);
+
+// Persona model
+export interface IPersona extends Document {
+  _id: string;
+  userId?: string;
+  organizationId?: string;
+  teamId?: string;
+  name: string;
+  description?: string;
+  category: 'coding' | 'analysis' | 'writing' | 'reasoning' | 'creative' | 'technical' | 'customer_support' | 'educational' | 'custom';
+  tags: string[];
+  config: {
+    identity: {
+      name: string;
+      creator: string;
+      version?: string;
+      personalityTraits?: string[];
+      communicationStyle?: 'formal' | 'casual' | 'technical' | 'friendly' | 'professional';
+    };
+    systemPrompt: string;
+    responseFilters: {
+      removeModelNames: string[];
+      replaceWith: Record<string, string>;
+      blockPatterns: string[];
+      contextAwareReplacements?: Array<{
+        context: string;
+        replacements: Record<string, string>;
+      }>;
+      semanticBlockThreshold?: number;
+    };
+    behavior: {
+      enforceFirstPerson: boolean;
+      enforceKnowledgeCutoff: string;
+      enforceCapabilities: string[];
+      enforceReasoningStyle?: 'step-by-step' | 'concise' | 'detailed' | 'socratic';
+      enforceReasoningFormat?: 'xml' | 'markdown' | 'plain';
+      refusalStyle?: 'direct' | 'apologetic' | 'educational' | 'redirect';
+      uncertaintyExpression?: 'explicit' | 'hedged' | 'confident';
+      toolUsePersonality?: 'cautious' | 'confident' | 'exploratory';
+    };
+    reasoning?: {
+      enabled: boolean;
+      enforceCotFormat?: 'xml' | 'markdown' | 'hidden' | 'none';
+      hideReasoningFromUser?: boolean;
+      requiredReasoningSteps?: string[];
+      blockedReasoningPatterns?: string[];
+      minReasoningDepth?: number;
+    };
+    toolUse?: {
+      enabled: boolean;
+      toolSelectionPersonality?: 'cautious' | 'confident' | 'exploratory';
+      requiredToolConfirmation?: boolean;
+      toolResultPersona?: 'analytical' | 'conversational' | 'technical';
+      blockedTools?: string[];
+      customToolInstructions?: string;
+    };
+    multilingual?: {
+      enabled: boolean;
+      supportedLanguages: string[];
+      languageOverrides?: Record<string, any>;
+      autoDetectLanguage?: boolean;
+      enforceLanguageConsistency?: boolean;
+    };
+    providerOverrides?: Record<string, any>;
+    contextSwitching?: {
+      enabled: boolean;
+      rules: any[];
+    };
+  };
+  isActive: boolean;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const PersonaSchema = new Schema<IPersona>({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+  organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', index: true },
+  teamId: { type: Schema.Types.ObjectId, ref: 'Team', index: true },
+  name: { type: String, required: true, maxlength: 100 },
+  description: { type: String, maxlength: 500 },
+  category: { type: String, enum: ['coding', 'analysis', 'writing', 'reasoning', 'creative', 'technical', 'customer_support', 'educational', 'custom'], default: 'custom' },
+  tags: [{ type: String }],
+  config: { type: Schema.Types.Mixed, required: true },
+  isActive: { type: Boolean, default: true },
+  isDefault: { type: Boolean, default: false },
+}, {
+  timestamps: true,
+  collection: 'personas',
+});
+
+PersonaSchema.index({ userId: 1, isActive: 1 });
+PersonaSchema.index({ organizationId: 1, isActive: 1 });
+PersonaSchema.index({ teamId: 1, isActive: 1 });
+PersonaSchema.index({ category: 1 });
+
+export const Persona = mongoose.model<IPersona>('Persona', PersonaSchema);

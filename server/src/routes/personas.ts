@@ -282,7 +282,7 @@ export async function personaRoutes(fastify: any) {
     const { personaTestRunner } = await import('../services/persona-test.service');
     
     // Use provided test cases or generate default ones
-    const testCases = request.body.testCases || this.generateDefaultTestCases(persona);
+    const testCases = request.body.testCases || generateDefaultTestCases(persona);
     
     const results = await personaTestRunner.runTestSuite(testCases, request.body.options || {});
     const report = personaTestRunner.generateReport(results);
@@ -312,7 +312,7 @@ export async function personaRoutes(fastify: any) {
 
     const allResults: any[] = [];
     for (const persona of personas) {
-      const testCases = this.generateDefaultTestCases(persona);
+      const testCases = generateDefaultTestCases(persona);
       const results = await personaTestRunner.runTestSuite(testCases, request.body.options || {});
       allResults.push({
         personaId: persona._id.toString(),

@@ -9,6 +9,14 @@ import { personaTelemetryService } from './persona-telemetry.service';
  */
 
 export const DEFAULT_CLAUDE_PERSONA: PersonaConfig = {
+  id: 'default-claude',
+  name: 'Default Claude',
+  version: '3.5',
+  isActive: true,
+  isDefault: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  createdBy: 'system',
   identity: {
     name: 'Claude',
     creator: 'Anthropic',
@@ -353,12 +361,13 @@ export class PersonaEnforcer {
     
     // Check for blocked patterns
     for (const pattern of persona.responseFilters.blockPatterns) {
-      if (pattern.test(filtered)) {
+      const regex = toRegExp(pattern);
+      if (regex.test(filtered)) {
         // Replace problematic sections
-        filtered = filtered.replace(pattern, '[IDENTITY ENFORCED: I am Claude, created by Anthropic]');
+        filtered = filtered.replace(regex, '[IDENTITY ENFORCED: I am Claude, created by Anthropic]');
         // Record violation
         personaTelemetryService.recordViolation(persona.id || 'default', 'blocked_pattern', 'critical', {
-          pattern: pattern.source,
+          pattern: regex.source,
           originalResponse: response,
         });
       }
@@ -386,7 +395,8 @@ export class PersonaEnforcer {
     // Block certain reasoning patterns
     if (reasoning.blockedReasoningPatterns) {
       for (const pattern of reasoning.blockedReasoningPatterns) {
-        result = result.replace(pattern, '[REASONING FILTERED]');
+        const regex = toRegExp(pattern);
+        result = result.replace(regex, '[REASONING FILTERED]');
       }
     }
     
@@ -775,6 +785,25 @@ function enforceFirstPersonAsClaude(text: string, persona: PersonaConfig): strin
  */
 function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Normalize pattern to RegExp - handles both string and RegExp inputs
+ * This is needed because patterns stored in MongoDB may be serialized as strings
+ */
+function toRegExp(pattern: string | RegExp): RegExp {
+  if (pattern instanceof RegExp) {
+    return pattern;
+  }
+  // String patterns from DB are stored as "/pattern/flags" or "pattern"
+  const trimmed = pattern.trim();
+  if (trimmed.startsWith('/') && trimmed.lastIndexOf('/') > 0) {
+    const lastSlash = trimmed.lastIndexOf('/');
+    const patternStr = trimmed.slice(1, lastSlash);
+    const flags = trimmed.slice(lastSlash + 1);
+    return new RegExp(patternStr, flags);
+  }
+  return new RegExp(escapeRegExp(trimmed), 'gi');
 }
 
 /**

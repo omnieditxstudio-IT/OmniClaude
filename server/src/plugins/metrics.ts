@@ -113,6 +113,41 @@ export const webhookDeliveriesTotal = new Counter({
   registers: [register],
 });
 
+export const personaEnforcementsTotal = new Counter({
+  name: 'gateway_persona_enforcements_total',
+  help: 'Total persona enforcements',
+  labelNames: ['persona_id', 'provider', 'model'],
+  registers: [register],
+});
+
+export const personaViolationsTotal = new Counter({
+  name: 'gateway_persona_violations_total',
+  help: 'Total persona violations detected',
+  labelNames: ['persona_id', 'violation_type', 'severity'],
+  registers: [register],
+});
+
+export const personaSwitchesTotal = new Counter({
+  name: 'gateway_persona_switches_total',
+  help: 'Total persona switches',
+  labelNames: ['from_persona_id', 'to_persona_id', 'transition_type'],
+  registers: [register],
+});
+
+export const personaTestsTotal = new Counter({
+  name: 'gateway_persona_tests_total',
+  help: 'Total persona tests run',
+  labelNames: ['persona_id', 'result'],
+  registers: [register],
+});
+
+export const templateApplicationsTotal = new Counter({
+  name: 'gateway_template_applications_total',
+  help: 'Total template applications',
+  labelNames: ['template_id'],
+  registers: [register],
+});
+
 // Metrics middleware for Fastify
 export async function metricsPlugin(fastify: FastifyInstance) {
   // Expose metrics endpoint
@@ -168,6 +203,21 @@ export async function metricsPlugin(fastify: FastifyInstance) {
     recordWebhookDelivery: (event: string, status: 'success' | 'failed') => {
       webhookDeliveriesTotal.inc({ event, status });
     },
+    recordPersonaEnforcement: (personaId: string, provider: string, model: string) => {
+      personaEnforcementsTotal.inc({ persona_id: personaId, provider, model });
+    },
+    recordPersonaViolation: (personaId: string, violationType: string, severity: string) => {
+      personaViolationsTotal.inc({ persona_id: personaId, violation_type: violationType, severity });
+    },
+    recordPersonaSwitch: (fromPersonaId: string, toPersonaId: string, transitionType: string) => {
+      personaSwitchesTotal.inc({ from_persona_id: fromPersonaId, to_persona_id: toPersonaId, transition_type: transitionType });
+    },
+    recordPersonaTest: (personaId: string, result: string) => {
+      personaTestsTotal.inc({ persona_id: personaId, result });
+    },
+    recordTemplateApplication: (templateId: string) => {
+      templateApplicationsTotal.inc({ template_id: templateId });
+    },
     updateGauges: (gauges: { activeUsers?: number; apiKeys?: { provider: string; active: number; inactive: number }[]; endpoints?: { provider: string; active: number; inactive: number }[]; mappings?: { active: number; inactive: number } }) => {
       if (gauges.activeUsers !== undefined) {
         activeUsers.set(gauges.activeUsers);
@@ -201,6 +251,11 @@ declare module 'fastify' {
       recordCacheHit: (cacheType: string) => void;
       recordCacheMiss: (cacheType: string) => void;
       recordWebhookDelivery: (event: string, status: 'success' | 'failed') => void;
+      recordPersonaEnforcement: (personaId: string, provider: string, model: string) => void;
+      recordPersonaViolation: (personaId: string, violationType: string, severity: string) => void;
+      recordPersonaSwitch: (fromPersonaId: string, toPersonaId: string, transitionType: string) => void;
+      recordPersonaTest: (personaId: string, result: string) => void;
+      recordTemplateApplication: (templateId: string) => void;
       updateGauges: (gauges: { activeUsers?: number; apiKeys?: { provider: string; active: number; inactive: number }[]; endpoints?: { provider: string; active: number; inactive: number }[]; mappings?: { active: number; inactive: number } }) => void;
     };
   }

@@ -11,6 +11,7 @@ import { KeysPage } from '@/pages/KeysPage';
 import { EndpointsPage } from '@/pages/EndpointsPage';
 import { MappingsPage } from '@/pages/MappingsPage';
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
+import { PersonaAnalyticsPage } from '@/pages/PersonaAnalyticsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 
 function ProtectedRoute() {
@@ -65,6 +66,7 @@ export function App() {
               <Route path="/endpoints" element={<EndpointsPage />} />
               <Route path="/mappings" element={<MappingsPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/personas/analytics" element={<PersonaAnalyticsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Route>

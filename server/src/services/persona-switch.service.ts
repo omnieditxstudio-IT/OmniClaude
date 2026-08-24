@@ -1,5 +1,7 @@
 import { PersonaConfig, PersonaSwitchRequest, PersonaSwitchResponse } from './persona.types';
 import { getPersonaConfig } from './persona.service';
+import { personaTelemetryService } from './persona-telemetry.service';
+import { personaWebSocketService } from './persona-websocket.service';
 
 export interface PersonaSession {
   sessionId: string;
@@ -107,6 +109,20 @@ export class PersonaSwitchService {
 
     session.updatedAt = new Date();
     this.sessions.set(session.sessionId, session);
+
+    // Record telemetry
+    personaTelemetryService.recordSwitch(fromPersonaId, request.toPersonaId, transitionType);
+
+    // Broadcast via WebSocket
+    if (request.context?.conversationId) {
+      personaWebSocketService.broadcastSwitch(request.context.conversationId, {
+        type: 'switch',
+        fromPersonaId,
+        toPersonaId: request.toPersonaId,
+        transitionType,
+        data: { warnings, blendedMessages },
+      });
+    }
 
     return {
       success: true,

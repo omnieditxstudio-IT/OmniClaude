@@ -49,6 +49,14 @@ export async function buildApp(): Promise<FastifyInstance> {
   // Initialize tracing
   await fastify.register(tracingPlugin);
   
+  // Initialize telemetry
+  const { personaTelemetryService } = await import('./services/persona-telemetry.service');
+  personaTelemetryService.initialize(fastify);
+  
+  // Initialize WebSocket service
+  const { personaWebSocketService } = await import('./services/persona-websocket.service');
+  personaWebSocketService.initialize(fastify);
+  
   // Register plugins
   await fastify.register(fastifyCors, {
     origin: env.DASHBOARD_URL,

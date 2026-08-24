@@ -1,6 +1,7 @@
 import { AnthropicMessagesRequest, AnthropicContentBlock } from '@gateway/shared';
 import { PersonaConfig, ReasoningEnforcement } from './persona.types';
 import { multilingualPersonaService } from './multilingual-persona.service';
+import { personaTelemetryService } from './persona-telemetry.service';
 
 /**
  * Persona Enforcement System
@@ -285,7 +286,12 @@ export class PersonaEnforcer {
     };
     
     // Apply multilingual enforcement
-    return multilingualPersonaService.enforceMultilingual(enforcedRequest, provider, modelId);
+    const finalRequest = multilingualPersonaService.enforceMultilingual(enforcedRequest, provider, modelId);
+    
+    // Record telemetry
+    personaTelemetryService.recordEnforcement(persona.id || 'default', provider, modelId);
+    
+    return finalRequest;
   }
   
   /**
@@ -350,6 +356,11 @@ export class PersonaEnforcer {
       if (pattern.test(filtered)) {
         // Replace problematic sections
         filtered = filtered.replace(pattern, '[IDENTITY ENFORCED: I am Claude, created by Anthropic]');
+        // Record violation
+        personaTelemetryService.recordViolation(persona.id || 'default', 'blocked_pattern', 'critical', {
+          pattern: pattern.source,
+          originalResponse: response,
+        });
       }
     }
     

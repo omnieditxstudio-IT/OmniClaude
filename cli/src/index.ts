@@ -998,6 +998,97 @@ personaCmd
     }
   });
 
+personaCmd
+  .command('analytics')
+  .description('Show persona analytics')
+  .option('--persona <id>', 'Persona ID for detailed analytics')
+  .action(async (options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      if (options.persona) {
+        const [enforcement, performance] = await Promise.all([
+          axios.get(`${baseURL}/api/personas/analytics/enforcement?personaId=${options.persona}`, {
+            headers: { Authorization: `Bearer ${options.token || 'test'}` },
+          }),
+          axios.get(`${baseURL}/api/personas/analytics/performance?personaId=${options.persona}`, {
+            headers: { Authorization: `Bearer ${options.token || 'test'}` },
+          }),
+        ]);
+        console.log('Enforcement Analytics:');
+        console.log(JSON.stringify(enforcement.data, null, 2));
+        console.log('\nPerformance Metrics:');
+        console.log(JSON.stringify(performance.data, null, 2));
+      } else {
+        const response = await axios.get(`${baseURL}/api/personas/analytics/summary`, {
+          headers: { Authorization: `Bearer ${options.token || 'test'}` },
+        });
+        console.log(JSON.stringify(response.data, null, 2));
+      }
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('marketplace')
+  .description('Browse persona marketplace')
+  .option('--category <cat>', 'Filter by category')
+  .option('--search <query>', 'Search personas')
+  .option('--limit <n>', 'Max results', '20')
+  .action(async (options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const params = new URLSearchParams();
+      if (options.category) params.set('category', options.category);
+      if (options.search) params.set('search', options.search);
+      params.set('limit', options.limit);
+
+      const response = await axios.get(`${baseURL}/api/personas/marketplace?${params}`, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('share')
+  .description('Share a persona')
+  .argument('<id>', 'Persona ID')
+  .option('--public', 'Make publicly available', true)
+  .action(async (id, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.post(`${baseURL}/api/personas/${id}/share`, {
+        isPublic: options.public,
+      }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
+personaCmd
+  .command('import-marketplace')
+  .description('Import a persona from marketplace')
+  .argument('<marketplaceId>', 'Marketplace persona ID')
+  .action(async (marketplaceId, options) => {
+    const baseURL = options.url || `http://localhost:${options.port || '3000'}`;
+    try {
+      const response = await axios.post(`${baseURL}/api/personas/marketplace/import`, {
+        marketplaceItemId: marketplaceId,
+      }, {
+        headers: { Authorization: `Bearer ${options.token || 'test'}` },
+      });
+      console.log(JSON.stringify(response.data, null, 2));
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+    }
+  });
+
 // ==================== Deployment Commands ====================
 const deployCmd = program
   .command('deploy')

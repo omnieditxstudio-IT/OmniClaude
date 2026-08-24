@@ -487,4 +487,124 @@ export async function personaRoutes(fastify: any) {
 
     return rollbackVersion;
   });
+
+  fastify.get('/analytics/summary', async (request: FastifyRequest, reply: FastifyReply) => {
+    const userId = (request as any).user?.id;
+    if (!userId) return reply.status(401).send({ error: 'Unauthorized' });
+
+    const personas = await Persona.find({ userId: new mongoose.Types.ObjectId(userId), isActive: true });
+    
+    const summary = {
+      totalPersonas: personas.length,
+      totalTests: personas.length * 2, // Mock: 2 tests per persona
+      totalSwitches: 0, // Would be tracked in a real implementation
+      totalViolations: 0,
+      byCategory: {} as Record<string, number>,
+      recentActivity: [],
+    };
+
+    // Count by category
+    for (const persona of personas) {
+      const category = persona.category || 'custom';
+      summary.byCategory[category] = (summary.byCategory[category] || 0) + 1;
+    }
+
+    // Get recent audit activity
+    const recentLogs = await PersonaAuditService.getRecentLogs(10);
+    summary.recentActivity = recentLogs.map(log => ({
+      action: log.action,
+      personaId: log.personaId,
+      timestamp: log.createdAt,
+    }));
+
+    return summary;
+  });
+
+  fastify.get('/analytics/enforcement', async (request: FastifyRequest<{ Querystring: { personaId?: string; startDate?: string; endDate?: string } }>, reply: FastifyReply) => {
+    const userId = (request as any).user?.id;
+    if (!userId) return reply.status(401).send({ error: 'Unauthorized' });
+
+    // In a real implementation, this would query metrics database
+    // For now, return mock data
+    return {
+      totalEnforcements: 0,
+      byProvider: {},
+      byModel: {},
+      violations: [],
+      timeSeries: [],
+    };
+  });
+
+  fastify.get('/analytics/performance', async (request: FastifyRequest<{ Querystring: { personaId?: string } }>, reply: FastifyReply) => {
+    const userId = (request as any).user?.id;
+    if (!userId) return reply.status(401).send({ error: 'Unauthorized' });
+
+    // In a real implementation, this would calculate from metrics
+    return {
+      avgEnforcementLatencyMs: 0,
+      avgResponseLatencyMs: 0,
+      cacheHitRate: 0,
+      errorRate: 0,
+      throughput: 0,
+    };
+  });
+
+  fastify.post('/:id/share', async (request: FastifyRequest<{ Params: { id: string }; Body: { isPublic?: boolean } }>, reply: FastifyReply) => {
+    const userId = (request as any).user?.id;
+    if (!userId) return reply.status(401).send({ error: 'Unauthorized' });
+
+    const persona = await Persona.findOne({ _id: request.params.id, userId: new mongoose.Types.ObjectId(userId) });
+    if (!persona) return reply.status(404).send({ error: 'Persona not found' });
+
+    const { personaMarketplaceService } = await import('../services/persona-marketplace.service');
+    const result = await personaMarketplaceService.sharePersona(
+      request.params.id,
+      userId,
+      request.body.isPublic ?? true
+    );
+
+    await PersonaAuditService.log({
+      personaId: persona._id.toString(),
+      userId,
+      action: 'updated',
+      details: { action: 'share', isPublic: request.body.isPublic },
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'],
+    });
+
+    return result;
+  });
+
+  fastify.delete('/:id/share', async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const userId = (request as any).user?.id;
+    if (!userId) return reply.status(401).send({ error: 'Unauthorized' });
+
+    const persona = await Persona.findOne({ _id: request.params.id, userId: new mongoose.Types.ObjectId(userId) });
+    if (!persona) return reply.status(404).send({ error: 'Persona not found' });
+
+    const { personaMarketplaceService } = await import('../services/persona-marketplace.service');
+    await personaMarketplaceService.unsharePersona(request.params.id, userId);
+
+    return { success: true };
+  });
+
+  fastify.get('/marketplace', async (request: FastifyRequest<{ Querystring: { category?: string; search?: string; limit?: string; offset?: string } }>, reply: FastifyReply) => {
+    const { personaMarketplaceService } = await import('../services/persona-marketplace.service');
+    const items = await personaMarketplaceService.getMarketplacePersonas(
+      request.query.category,
+      request.query.search,
+      parseInt(request.query.limit || '20'),
+      parseInt(request.query.offset || '0')
+    );
+    return items;
+  });
+
+  fastify.post('/marketplace/import', async (request: FastifyRequest<{ Body: { marketplaceItemId: string } }>, reply: FastifyReply) => {
+    const userId = (request as any).user?.id;
+    if (!userId) return reply.status(401).send({ error: 'Unauthorized' });
+
+    const { personaMarketplaceService } = await import('../services/persona-marketplace.service');
+    const result = await personaMarketplaceService.importFromMarketplace(request.body.marketplaceItemId, userId);
+    return result;
+  });
 }

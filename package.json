@@ -1,34 +1,64 @@
 {
-  "name": "model-translation-gateway",
+  "name": "llm-gateway",
   "version": "1.0.0",
-  "description": "Gateway to translate Anthropic/Claude API requests to any LLM provider",
-  "private": true,
+  "description": "Universal LLM Gateway - Use any LLM with Claude Code, Cursor, Codex, Aider, OpenHands. Translates between all major LLM providers.",
+  "main": "cli.js",
+  "bin": {
+    "llm-gateway": "./cli.js",
+    "llmgateway": "./cli.js"
+  },
+  "scripts": {
+    "setup": "node cli.js setup",
+    "start": "node cli.js start",
+    "stop": "node cli.js stop",
+    "restart": "node cli.js restart",
+    "status": "node cli.js status",
+    "config": "node cli.js config",
+    "providers": "node cli.js providers",
+    "client": "node cli.js client",
+    "install": "node cli.js install --npm",
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:dashboard\"",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:dashboard": "npm run dev --workspace=dashboard",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "docker:build": "docker build -t llm-gateway .",
+    "docker:run": "docker run -p 8080:8080 llm-gateway"
+  },
   "workspaces": [
     "server",
     "dashboard",
     "cli",
     "shared"
   ],
-  "scripts": {
-    "dev": "concurrently \"npm:dev:server\" \"npm:dev:dashboard\"",
-    "dev:server": "npm run dev --workspace=server",
-    "dev:dashboard": "npm run dev --workspace=dashboard",
-    "build": "npm run build --workspaces",
-    "build:server": "npm run build --workspace=server",
-    "build:dashboard": "npm run build --workspace=dashboard",
-    "start": "npm run start --workspace=server",
-    "start:prod": "npm run start:prod --workspace=server",
-    "cli": "npm run start --workspace=cli",
-    "db:migrate": "npm run db:migrate --workspace=server",
-    "db:seed": "npm run db:seed --workspace=server",
-    "lint": "npm run lint --workspaces",
-    "typecheck": "npm run typecheck --workspaces",
-    "test": "npm run test --workspaces",
-    "docker:build": "docker-compose build",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "persona": "node persona-cli.js",
-    "personas": "node persona-cli.js"
+  "keywords": [
+    "llm",
+    "gateway",
+    "proxy",
+    "anthropic",
+    "claude",
+    "openai",
+    "gpt",
+    "gemini",
+    "ollama",
+    "deepseek",
+    "cursor",
+    "claude-code",
+    "codex",
+    "aider",
+    "translation",
+    "api-proxy",
+    "ai-gateway",
+    "llm-proxy"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
@@ -37,5 +67,13 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "packageManager": "npm@10.8.0"
+  "os": [
+    "linux",
+    "darwin",
+    "win32"
+  ],
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
 }

@@ -57,6 +57,10 @@ export async function buildApp(): Promise<FastifyInstance> {
   const { personaWebSocketService } = await import('./services/persona-websocket.service');
   personaWebSocketService.initialize(fastify);
   
+  // Register all provider adapters
+  const { registerAllAdapters } = await import('./adapters');
+  registerAllAdapters();
+  
   // Register plugins
   await fastify.register(fastifyCors, {
     origin: env.DASHBOARD_URL,

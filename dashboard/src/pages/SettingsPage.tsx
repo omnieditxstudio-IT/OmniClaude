@@ -333,7 +333,7 @@ export function SettingsPage() {
               </Button>
             </div>
           </CardContent>
-        </AnimatedCard
+        </AnimatedCard>
       </Reveal>
     </div>
   );

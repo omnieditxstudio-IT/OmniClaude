@@ -332,7 +332,8 @@ export function KeysPage() {
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Delete
                                   </DropdownMenuItem>
-                                </DropdownMenuContent                              </DropdownMenu>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </TableCell>
                           </TableRow>
                         </AnimatedCard>

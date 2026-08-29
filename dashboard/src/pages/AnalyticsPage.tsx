@@ -307,7 +307,8 @@ export function AnalyticsPage() {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-            </CardContent          </AnimatedCard>
+            </CardContent>
+          </AnimatedCard>
         </Reveal>
 
         {/* Model Distribution */}
@@ -367,7 +368,7 @@ export function AnalyticsPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </CardContent
+            </CardContent>
           </AnimatedCard>
         </Reveal>
       </div>

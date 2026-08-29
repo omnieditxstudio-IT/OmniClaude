@@ -394,7 +394,8 @@ function MappingEntryForm({ index, field, endpoints, getModelsForEndpoint, remov
               {CLAUDE_MODELS.map(model => (
                 <SelectItem key={model} value={model}>{model}</SelectItem>
               ))}
-            </SelectContent          </Select>
+            </SelectContent>
+          </Select>
           {errors?.claudeModelId && <p className="text-sm text-destructive">{errors.claudeModelId.message}</p>}
         </div>
 
@@ -417,7 +418,8 @@ function MappingEntryForm({ index, field, endpoints, getModelsForEndpoint, remov
                   {endpoint.name} ({endpoint.provider})
                 </SelectItem>
               ))}
-            </SelectContent          </Select>
+            </SelectContent>
+          </Select>
           {errors?.endpointId && <p className="text-sm text-destructive">{errors.endpointId.message}</p>}
         </div>
 
@@ -437,7 +439,8 @@ function MappingEntryForm({ index, field, endpoints, getModelsForEndpoint, remov
                   {model.name} ({model.id})
                 </SelectItem>
               ))}
-            </SelectContent          </Select>
+            </SelectContent>
+          </Select>
           {errors?.providerModelId && <p className="text-sm text-destructive">{errors.providerModelId.message}</p>}
         </div>
       </div>
@@ -478,7 +481,8 @@ function FallbacksArray({ index, register }: { index: number; register: any }) {
               {endpoints.map((e: any) => (
                 <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
               ))}
-            </SelectContent          </Select>
+            </SelectContent>
+          </Select>
           <Select
             {...register(`mappings.${index}.fallbacks.${fbIndex}.providerModelId`)}
             defaultValue={fallback.providerModelId}
@@ -490,7 +494,8 @@ function FallbacksArray({ index, register }: { index: number; register: any }) {
               {getModelsForEndpoint(fallback.endpointId).map((m: any) => (
                 <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
               ))}
-            </SelectContent          </Select>
+            </SelectContent>
+          </Select>
           <Input
             type="number"
             min="0"
@@ -620,7 +625,8 @@ function MappingsList({
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Test mapping with a sample request</p>
-                  </TooltipContent                </Tooltip>
+                  </TooltipContent>
+                </Tooltip>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

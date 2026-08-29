@@ -459,23 +459,18 @@ function EndpointsList({
                     >
                       {healthCheckingId === endpoint.id ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : endpoint.isActive ? (
+                        <Wifi className="mr-2 h-4 w-4" />
                       ) : (
-                        <>
-                          {healthCheckingId === endpoint.id ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : endpoint.isActive ? (
-                            <Wifi className="mr-2 h-4 w-4" />
-                          ) : (
-                            <WifiOff className="mr-2 h-4 w-4" />
-                          )
-                        </>
+                        <WifiOff className="mr-2 h-4 w-4" />
                       )}
                       {healthCheckingId === endpoint.id ? 'Checking...' : endpoint.isActive ? 'Healthy' : 'Offline'}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Check endpoint health</p>
-                  </TooltipContent                </Tooltip>
+                  </TooltipContent>
+                </Tooltip>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

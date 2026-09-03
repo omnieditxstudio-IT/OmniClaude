@@ -1,17 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { motion } from 'framer-motion';
-import { useAuth } from '@/hooks/useAuth';
-import { api } from '@/lib/api';
+import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Reveal, StaggerContainer, NumberTicker, AnimatedCard } from '@/components/ui/animated-components';
+import { Reveal, NumberTicker, AnimatedCard } from '@/components/ui/animated-components';
 import { cn } from '@/lib/utils';
 import {
   BarChart3,
-  TrendingUp,
   Shield,
   Activity,
   Users,
@@ -73,7 +69,6 @@ interface PersonaAnalytics {
 }
 
 export function PersonaAnalyticsPage() {
-  const { user } = useAuth();
   const [analytics, setAnalytics] = React.useState<PersonaAnalytics | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [timeRange, setTimeRange] = React.useState<'24h' | '7d' | '30d'>('7d');
@@ -169,12 +164,6 @@ export function PersonaAnalyticsPage() {
     value,
   }));
 
-  const violationData = analytics.enforcement.violations.map(v => ({
-    name: v.type,
-    value: v.count,
-    severity: v.severity,
-  }));
-
   const providerData = Object.entries(analytics.enforcement.byProvider).map(([name, value]) => ({
     name,
     value,
@@ -217,7 +206,7 @@ export function PersonaAnalyticsPage() {
       {/* Stats Grid */}
       <Reveal direction="up" delay={0.1}>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {statCards.map((stat, index) => (
+          {statCards.map((stat) => (
             <AnimatedCard key={stat.label} className="stagger-1">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">

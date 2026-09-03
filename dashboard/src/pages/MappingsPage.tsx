@@ -1,25 +1,21 @@
 'use client';
 
 import * as React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
-import { api, ModelMapping, ModelMappingEntry, Endpoint, EndpointModel } from '@/lib/api';
+import api, { ModelMapping, Endpoint, EndpointModel } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Reveal, StaggerContainer, AnimatedCard, NumberTicker } from '@/components/ui/animated-components';
-import { useForm, useFieldArray, FieldValues } from 'react-hook-form';
+import { Reveal, AnimatedCard } from '@/components/ui/animated-components';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
@@ -28,22 +24,17 @@ import {
   Plus,
   GitBranch,
   ArrowRightLeft,
-  Settings,
   Trash2,
   Check,
   X,
   Loader2,
-  Eye,
   Copy,
   CheckCircle,
-  AlertCircle,
-  GripVertical,
   PlusCircle,
   MinusCircle,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
 
 const mappingEntrySchema = z.object({
   claudeModelId: z.string().min(1, 'Claude model ID is required'),
@@ -80,20 +71,16 @@ const CLAUDE_MODELS = [
 ];
 
 export function MappingsPage() {
-  const { refreshUser } = useAuth();
+  const {} = useAuth();
   const [mappings, setMappings] = React.useState<ModelMapping[]>([]);
   const [endpoints, setEndpoints] = React.useState<Endpoint[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [creating, setCreating] = React.useState(false);
   const [testingId, setTestingId] = React.useState<string | null>(null);
-  const [editingId, setEditingId] = React.useState<string | null>(null);
-
   const {
     register,
     handleSubmit,
     reset,
-    watch,
-    setValue,
     control,
     formState: { errors },
   } = useForm<CreateMappingForm>({
@@ -457,13 +444,13 @@ function MappingEntryForm({ index, field, endpoints, getModelsForEndpoint, remov
             Add Fallback
           </Button>
         </div>
-        <FallbacksArray index={index} register={register} />
+        <FallbacksArray index={index} register={register} endpoints={endpoints} getModelsForEndpoint={getModelsForEndpoint} />
       </div>
     </div>
   );
 }
 
-function FallbacksArray({ index, register }: { index: number; register: any }) {
+function FallbacksArray({ index, register, endpoints, getModelsForEndpoint }: { index: number; register: any; endpoints: any[]; getModelsForEndpoint: (id: string) => any[] }) {
   const fallbacks = register(`mappings.${index}.fallbacks`).value || [];
   
   return (
@@ -663,7 +650,7 @@ function MappingsList({
 
             {/* Mapping Details */}
             <div className="mt-4 pt-4 border-t">
-              <div className="grid gap-2 md:grid-cols-4">
+              <div className="grid gap-2 md:grid-cols-2">
                 {mapping.mappings.map((entry, idx) => (
                   <div key={idx} className="p-3 bg-muted/30 rounded-lg">
                     <div className="flex items-center gap-2 text-sm">
@@ -680,7 +667,7 @@ function MappingsList({
                       </p>
                     )}
                   </div>
-                )}
+                ))}
               </div>
             </div>
           </CardContent>

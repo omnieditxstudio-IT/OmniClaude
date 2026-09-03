@@ -1,33 +1,26 @@
 'use client';
 
 import * as React from 'react';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
-import { api, User } from '@/lib/api';
+import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Reveal, StaggerContainer, AnimatedCard } from '@/components/ui/animated-components';
+import { Reveal, AnimatedCard } from '@/components/ui/animated-components';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 import {
-  User as UserIcon,
-  Mail,
-  Lock,
   Palette,
   Monitor,
-  Bell,
   Shield,
   Globe,
   Save,
   Loader2,
-  Eye,
-  EyeOff,
+  Moon,
+  AlertCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -51,7 +44,7 @@ export function SettingsPage() {
     register,
     handleSubmit,
     reset,
-    watch,
+    setValue,
     formState: { errors },
   } = useForm<SettingsForm>({
     defaultValues: {
@@ -188,7 +181,7 @@ export function SettingsPage() {
                 <Select
                   {...register('theme')}
                   onValueChange={(value) => {
-                    register('theme').onChange(value);
+                    setValue('theme', value as any);
                     document.documentElement.classList.toggle('dark', value === 'dark' || (value === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches));
                   }}
                 >
@@ -301,7 +294,7 @@ export function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label>Provider ID</Label>
-                <code className="text-sm">{user?.providerId}</code>
+                <code className="text-sm">{user?.provider}</code>
               </div>
             </div>
           </CardContent>

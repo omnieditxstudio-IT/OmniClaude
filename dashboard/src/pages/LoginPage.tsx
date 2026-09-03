@@ -1,13 +1,11 @@
 'use client';
-
-import * as React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { BackgroundBeamsWithMouse, Spotlight, GridPattern } from '@/components/ui/animated-backgrounds';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Reveal } from '@/components/ui/animated-components';
-import { Github, Chrome, Sparkles, ArrowRight, Shield, Zap, Globe } from 'lucide-react';
+import { Github, Chrome, Sparkles, Shield, Zap, Globe } from 'lucide-react';
 
 export function LoginPage() {
   const { signIn } = useAuth();

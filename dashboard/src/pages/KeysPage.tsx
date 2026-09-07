@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useAuth } from '@/hooks/useAuth';
 import api, { ApiKey } from '@/lib/api';
 import { Button } from '@/components/ui/button';

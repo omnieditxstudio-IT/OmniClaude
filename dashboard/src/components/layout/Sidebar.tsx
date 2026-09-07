@@ -1,8 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -14,18 +13,14 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  User,
   Zap,
-  Globe,
-  Shield,
-  Sparkles,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { FloatingOrb, PulseDot, MagneticButton } from '@/components/ui/premium-components';
 
@@ -34,13 +29,13 @@ const navigation = [
   { name: 'API Keys', href: '/keys', icon: Key, badge: 'New' },
   { name: 'Endpoints', href: '/endpoints', icon: Server, badge: null },
   { name: 'Model Mappings', href: '/mappings', icon: GitBranch, badge: null },
-  { name: 'Personas', href: '/personas', icon: Sparkles, badge: 'AI' },
+  { name: 'Personas', href: '/personas', icon: LayoutDashboard, badge: 'AI' },
   { name: 'Analytics', href: '/analytics', icon: BarChart3, badge: null },
   { name: 'Settings', href: '/settings', icon: Settings, badge: null },
 ];
 
 export function Sidebar() {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const [collapsed, setCollapsed] = React.useState(false);
   const { user, signOut } = useAuth();
 
@@ -123,14 +118,14 @@ export function Sidebar() {
                 <p className="px-3 text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">
                   Navigation
                 </p>
-                {navigation.map((item, index) => {
+                {navigation.map((item) => {
                   const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
                   const Icon = item.icon;
                   return (
                     <Tooltip key={item.name} delayDuration={200}>
                       <TooltipTrigger asChild>
                         <Link
-                          href={item.href}
+                          to={item.href}
                           className={cn(
                             'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 group',
                             isActive
@@ -189,7 +184,7 @@ export function Sidebar() {
                     <Tooltip key={item.name} delayDuration={200}>
                       <TooltipTrigger asChild>
                         <Link
-                          href={item.href}
+                          to={item.href}
                           className={cn(
                             'relative flex items-center justify-center rounded-xl py-2.5 text-sm font-medium transition-all duration-200',
                             isActive
@@ -218,7 +213,7 @@ export function Sidebar() {
           </AnimatePresence>
         </nav>
 
-        {/* User Menu */}
+        {/* user Menu */}
         <div className="relative p-3 border-t border-white/10">
           <AnimatePresence mode="wait">
             {!collapsed && (
@@ -244,7 +239,7 @@ export function Sidebar() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-black/80 backdrop-blur-xl border-white/10 text-white">
                     <DropdownMenuItem asChild>
-                      <Link href="/settings" className="flex w-full items-center justify-start cursor-pointer hover:bg-white/5">
+                      <Link to="/settings" className="flex w-full items-center justify-start cursor-pointer hover:bg-white/5">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
@@ -284,7 +279,7 @@ export function Sidebar() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-black/80 backdrop-blur-xl border-white/10 text-white">
                     <DropdownMenuItem asChild>
-                      <Link href="/settings" className="flex w-full items-center justify-start cursor-pointer hover:bg-white/5">
+                      <Link to="/settings" className="flex w-full items-center justify-start cursor-pointer hover:bg-white/5">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>

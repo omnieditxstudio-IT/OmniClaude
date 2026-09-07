@@ -152,7 +152,7 @@ export function FloatingOrb({
   );
 }
 
-interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface MagneticButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart' | 'onAnimationEnd' | 'onAnimationIteration'> {
   children: React.ReactNode;
   magneticStrength?: number;
 }
@@ -218,7 +218,7 @@ export function PulseDot({ className, color = '#22c55e', size = 8 }: PulseDotPro
           boxShadow: `0 0 10px ${color}`,
         }}
       />
-      <style jsx>{`
+      <style>{`
         @keyframes pulse-ring {
           0%, 100% { transform: scale(1); opacity: 0.75; }
           50% { transform: scale(2.5); opacity: 0; }

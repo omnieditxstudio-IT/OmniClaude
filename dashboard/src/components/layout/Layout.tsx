@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
@@ -8,11 +9,11 @@ import { cn } from '@/lib/utils';
 import { BackgroundBeamsWithMouse, DotPattern } from '@/components/ui/animated-backgrounds';
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  const [sidebarCollapsed] = React.useState(false);
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-hidden">
@@ -41,7 +42,7 @@ export function Layout({ children }: LayoutProps) {
               staggerChildren: 0.1 
             }}
           >
-            {children}
+            {children || <Outlet />}
           </motion.div>
         </main>
       </div>

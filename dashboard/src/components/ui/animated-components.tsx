@@ -141,12 +141,13 @@ interface MarqueeProps {
 }
 
 export function Marquee({ 
-  children, 
-  className, 
-  speed = 50, 
+  children,
+  className,
+  speed = 50,
   direction = 'left',
-  pauseOnHover = true,
+  pauseOnHover: _pauseOnHover = true,
 }: MarqueeProps) {
+  // pauseOnHover is reserved for future functionality
   const [contentWidth, setContentWidth] = React.useState(0);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -269,7 +270,7 @@ export function StaggerContainer({
     <div className={cn('flex flex-col', className)}>
       {childArray.map((child, index) => (
         <motion.div
-          key={child.key || index}
+          key={index}
           initial={{ opacity: 0, y: direction === 'up' ? 20 : -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ 

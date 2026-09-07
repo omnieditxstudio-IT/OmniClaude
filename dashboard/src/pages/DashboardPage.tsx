@@ -5,31 +5,27 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { BackgroundBeamsWithMouse, DotPattern } from '@/components/ui/animated-backgrounds';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import {
   GlassCard,
   AnimatedGradientText,
   FloatingOrb,
   MagneticButton,
   PulseDot,
-  NumberTicker,
-  Reveal,
-  StaggerContainer,
-  AnimatedCard,
 } from '@/components/ui/premium-components';
-import { api, User } from '@/lib/api';
+import { NumberTicker, Reveal, StaggerContainer } from '@/components/ui/animated-components';
+import api from '@/lib/api';
 import {
   Key,
   Server,
   GitBranch,
   BarChart3,
-  ExternalLink,
   ArrowRight,
   CheckCircle,
   Zap,
   Shield,
   Globe,
-  Sparkles,
   Rocket,
   Crown,
 } from 'lucide-react';
@@ -42,7 +38,7 @@ const features = [
 ];
 
 export function DashboardPage() {
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
   const [stats, setStats] = React.useState({
     totalKeys: 0,
     activeEndpoints: 0,
@@ -180,7 +176,7 @@ export function DashboardPage() {
           {/* Stats Grid */}
           <Reveal direction="up" delay={0.2}>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {statCards.map((stat, index) => (
+              {statCards.map((stat) => (
                 <GlassCard
                   key={stat.label}
                   glowColor={stat.glowColor}
@@ -235,7 +231,7 @@ export function DashboardPage() {
 
           <StaggerContainer staggerDelay={0.1} direction="up">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {features.map((feature, index) => (
+              {features.map((feature) => (
                 <GlassCard
                   key={feature.title}
                   glowColor={`linear-gradient(135deg, ${feature.color.includes('blue') ? '#3b82f6' : feature.color.includes('green') ? '#22c55e' : feature.color.includes('purple') ? '#a855f7' : '#f97316'}, transparent)`}
@@ -270,7 +266,7 @@ export function DashboardPage() {
                 { icon: Shield, title: '1. Add Providers', desc: 'Add your API keys for OpenRouter, Ollama, Vertex AI, or any custom OpenAI-compatible endpoint.', color: 'from-blue-500 to-cyan-500' },
                 { icon: GitBranch, title: '2. Map Models', desc: 'Map any Claude model ID (opus, sonnet, haiku) to any provider model with fallback chains.', color: 'from-purple-500 to-pink-500' },
                 { icon: Globe, title: '3. Use Anywhere', desc: 'Set ANTHROPIC_BASE_URL to your gateway and use Claude Code with any LLM unlimited.', color: 'from-green-500 to-emerald-500' },
-              ].map((step, index) => (
+              ].map((step) => (
                 <GlassCard key={step.title} glowColor={step.color} className="text-center p-8">
                   <CardContent className="p-0">
                     <div className="h-16 w-16 rounded-2xl bg-gradient-to-br flex items-center justify-center mx-auto mb-4 shadow-lg" style={{ background: `linear-gradient(135deg, var(--tw-gradient-stops))` }}>

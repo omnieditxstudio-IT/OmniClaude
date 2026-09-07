@@ -1,22 +1,21 @@
 'use client';
 
 import * as React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useAuth } from '@/hooks/useAuth';
-import { api, Endpoint, EndpointModel } from '@/lib/api';
+import api, { Endpoint, EndpointModel } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Reveal, StaggerContainer, AnimatedCard } from '@/components/ui/animated-components';
+import { Reveal, AnimatedCard } from '@/components/ui/animated-components';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -31,15 +30,10 @@ import {
   Database,
   Globe,
   RefreshCw,
-  CheckCircle,
-  XCircle,
   Loader2,
   Trash2,
-  Edit,
   Eye,
-  ExternalLink,
-  Copy,
-  Check,
+  Shield,
 } from 'lucide-react';
 
 const createEndpointSchema = z.object({
@@ -70,15 +64,13 @@ const providerConfig = {
 };
 
 export function EndpointsPage() {
-  const { refreshUser } = useAuth();
+  useAuth();
   const [endpoints, setEndpoints] = React.useState<Endpoint[]>([]);
   const [apiKeys, setApiKeys] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [creating, setCreating] = React.useState(false);
   const [syncingId, setSyncingId] = React.useState<string | null>(null);
   const [healthCheckingId, setHealthCheckingId] = React.useState<string | null>(null);
-  const [editingEndpoint, setEditingEndpoint] = React.useState<Endpoint | null>(null);
-
   const {
     register,
     handleSubmit,
@@ -178,11 +170,6 @@ export function EndpointsPage() {
     }
   };
 
-  const handleEdit = (endpoint: Endpoint) => {
-    setEditingEndpoint(endpoint);
-    // Pre-fill form for editing - would need separate edit form
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -219,7 +206,7 @@ export function EndpointsPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="provider">Provider</Label>
-                  <Select onValueChange={register('provider').onChange} defaultValue="openrouter">
+                  <Select onValueChange={(value) => setValue('provider', value as any)} defaultValue="openrouter">
                     <SelectTrigger>
                       <SelectValue placeholder="Select provider" />
                     </SelectTrigger>
@@ -251,7 +238,7 @@ export function EndpointsPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="apiKeyId">API Key</Label>
-                  <Select onValueChange={register('apiKeyId').onChange}>
+                  <Select onValueChange={(value) => setValue('apiKeyId', value as any)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select API key" />
                     </SelectTrigger>

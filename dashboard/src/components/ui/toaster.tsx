@@ -1,7 +1,6 @@
-import { Toaster as Sonner } from 'sonner';
-import { type ToastProps } from 'sonner';
+import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
-export function Toaster({ ...props }: ToastProps) {
+export function Toaster({ ...props }: ToasterProps) {
   return (
     <Sonner
       theme="system"

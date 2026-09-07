@@ -1,15 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { motion } from 'framer-motion';
+
 import { useAuth } from '@/hooks/useAuth';
-import { api, RequestLog } from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import api, { RequestLog } from '@/lib/api';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { Reveal, StaggerContainer, NumberTicker, AnimatedCard } from '@/components/ui/animated-components';
 import { formatRelativeTime, formatTokens, formatLatency, cn, getStatusDotColor } from '@/lib/utils';
 import {
@@ -21,7 +21,6 @@ import {
   AlertCircle,
   CheckCircle,
   Download,
-  Filter,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -41,12 +40,12 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
+import { format } from 'date-fns';
 
 const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export function AnalyticsPage() {
-  const { refreshUser } = useAuth();
+  useAuth();
   const [logs, setLogs] = React.useState<RequestLog[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [timeRange, setTimeRange] = React.useState<'24h' | '7d' | '30d'>('24h');
@@ -190,7 +189,7 @@ export function AnalyticsPage() {
             <p className="text-muted-foreground">Monitor usage, performance, and costs</p>
           </div>
           <div className="flex items-center gap-3">
-            <Select value={timeRange} onValueChange={setTimeRange}>
+            <Select value={timeRange} onValueChange={(v) => setTimeRange(v as '24h' | '7d' | '30d')}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Time range" />
               </SelectTrigger>
@@ -211,7 +210,7 @@ export function AnalyticsPage() {
       {/* Stats Grid */}
       <Reveal direction="up" delay={0.1}>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {statCards.map((stat, index) => (
+          {statCards.map((stat) => (
             <AnimatedCard key={stat.label} className="stagger-1">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -220,8 +219,6 @@ export function AnalyticsPage() {
                     <NumberTicker
                       value={stat.value}
                       className="mt-1 text-3xl font-bold"
-                      format={stat.format}
-                      duration={1}
                     />
                     <div className="flex items-center gap-1 mt-1">
                       {stat.trendUp ? <TrendingUp className="h-4 w-4 text-green-500" /> : <TrendingDown className="h-4 w-4 text-red-500" />}

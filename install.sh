@@ -22,7 +22,7 @@ echo "✓ Node.js $(node -v) detected"
 
 # Install globally
 echo "📦 Installing LLM Gateway globally..."
-npm install -g .
+npm install -g llm-gateway
 
 # Verify installation
 echo ""

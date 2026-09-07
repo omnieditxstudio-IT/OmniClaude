@@ -17,7 +17,7 @@ echo ✓ Node.js detected
 
 REM Install globally
 echo 📦 Installing LLM Gateway globally...
-npm install -g .
+npm install -g llm-gateway
 
 echo.
 echo ✅ Installation complete!
